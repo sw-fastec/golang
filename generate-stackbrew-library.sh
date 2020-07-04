@@ -10,7 +10,7 @@ defaultDebianSuite='buster'
 declare -A debianSuite=(
 	#[1.13-rc]='buster'
 )
-defaultAlpineVersion='3.11'
+defaultAlpineVersion='3.12'
 declare -A alpineVersion=(
 	#[1.9]='3.7'
 )
@@ -77,9 +77,9 @@ for version in "${versions[@]}"; do
 	)
 
 	for v in \
-		buster stretch alpine{3.11,3.10} \
-		windows/windowsservercore-{ltsc2016,1809,1903,1909} \
-		windows/nanoserver-1809 \
+		buster stretch alpine{3.12,3.11} \
+		windows/windowsservercore-{ltsc2016,1809,1903,1909,2004} \
+		windows/nanoserver-{1809,1903,1909,2004} \
 	; do
 		dir="$version/$v"
 
@@ -107,9 +107,16 @@ for version in "${versions[@]}"; do
 		fi
 
 		case "$v" in
-			alpine*)   variantArches="$(parentArches "$version" "$v")" ;;
 			windows/*) variantArches='windows-amd64' ;;
-			*)         variantArches="$(variantArches "$version" "$v")" ;;
+
+			# stretch's "golang-go" package doesn't include GOARM for arm32v5 and "gccgo" in stretch can't build mips64le
+			stretch)
+				variantArches="$(variantArches "$version" "$v")"
+				;;
+
+			*)
+				variantArches="$(parentArches "$version" "$v")"
+				;;
 		esac
 
 		sharedTags=()
